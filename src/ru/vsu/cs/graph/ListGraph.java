@@ -86,6 +86,10 @@ public class ListGraph implements Graph {
         return path.stream().mapToInt(Integer::intValue).toArray();
     }
 
+    public int[] aStarSearch(int v1, int v2) { //TODO Реализовать A*
+        return null;
+    }
+
 
 //    public int[] waveSearch(int v1, int v2) {    GPT
 //        boolean found = false;

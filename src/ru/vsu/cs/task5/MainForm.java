@@ -21,6 +21,7 @@ public class MainForm extends JFrame {
     private JButton cleanButton;
     private JComboBox typeMethods;
     private JCheckBox teleportBox;
+    private JCheckBox checkBoxTypeTeleports;
 
     private static final int DEFAULT_COL_COUNT = 10;
     private static final int DEFAULT_ROW_COUNT = 6;
@@ -117,8 +118,7 @@ public class MainForm extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-                    //Изменять метод TODO !!!!
-                    game.StartClick(1);
+                    game.StartClick(typeMethods.getSelectedIndex(), checkBoxTypeTeleports.isSelected());
                     resultLabel.setText("Минимальное количество ходов до точки: " + game.getResult());
                     updateView();
                 } catch (Exception e) {
@@ -240,7 +240,7 @@ public class MainForm extends JFrame {
         return font;
     }
 
-    private void paintCell(int row, int column, Graphics2D g2d, int cellWidth, int cellHeight) {
+    private void paintCell(int row, int column, Graphics2D g2d, int cellWidth, int cellHeight) { //раскрашивание клеток
         Game.Cell cellValue = game.getCell(row, column);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         int size = Math.min(cellWidth, cellHeight);

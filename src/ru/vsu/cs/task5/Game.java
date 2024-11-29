@@ -35,8 +35,10 @@ public class Game {
 
 
     int[][] solve = {
-            {-1, 1, 0, 0}, //row
-            {0, 0, -1, 1} // col
+            {-1, 0}, // Вверх
+            {1, 0},  // Вниз
+            {0, -1}, // Влево
+            {0, 1}   // Вправо
     };
 
     public int getResult() {
@@ -54,12 +56,12 @@ public class Game {
                 field[row][col] = new Cell(CellState.OPENED, 0);
             }
         }
-        restoreTeleports();
+        initializeTeleports();
 
         graph = new ListGraph(rowCount * colCount);
     }
 
-    private void restoreTeleports() {
+    private void initializeTeleports() {
         for (int i = 0; i < 10; i++) {
             teleports[i] = new ArrayList<>();
         }
@@ -119,9 +121,9 @@ public class Game {
         field[row][col].teleportNumber = i;
     }
 
-    public void StartClick(int type) {
+    public void StartClick(int type, boolean typeTeleport) {
         clean();
-        createGraph();
+        createGraph(typeTeleport);
 
         int[] startEnd = coordinates();
         if (startEnd == null) {
@@ -133,8 +135,8 @@ public class Game {
             int v1 = cordToVertex(startEnd[0], startEnd[1]);
             int v2 = cordToVertex(startEnd[2], startEnd[3]);
             int[] path = switch (type) {
-                case 1 -> graph.waveSearch(v1, v2);
-                //TODO добавить A*
+                case 0 -> graph.waveSearch(v1, v2);
+                case 1 -> graph.aStarSearch(v1, v2);
                 default -> new int[]{};
             };
 
@@ -198,11 +200,11 @@ public class Game {
                 }
             }
         }
-        restoreTeleports();
+        initializeTeleports();
     }
 
     public boolean checkInPlace(int row, int col) {
-        return ((row >= 0) && (row < getRowCount())) && ((col >= 0) && (col < getColCount())) && ((field[row][col].state != CellState.CLOSED));
+        return ((row >= 0) && (row < getRowCount())) && ((col >= 0) && (col < getColCount())) && field[row][col].state != CellState.CLOSED;
     }
 
 
@@ -219,33 +221,49 @@ public class Game {
         return field[row][col];
     }
 
-    private void createGraph() {
+    private void createGraph(boolean isThrough) {
         graph = new ListGraph(getRowCount() * getColCount()); // Очистка графа перед построением или его инициализация при первом запуске
-
         for (int row = 0; row < field.length; row++) {
             for (int col = 0; col < field[row].length; col++) {
+//                switch (field[row][col].state) {
+//                    case TELEPORT -> {
+//                        if (isThrough) {
+//                            addToGraph(row, col);
+//                        }
+//                    }
+//                    case CLOSED -> {
+//                    }
+//                    default -> addToGraph(row, col);
+//                }
                 if (checkInPlace(row, col)) {
-                    int vertex = cordToVertex(row, col);
-
-                    // Добавление рёбер для соседних ячеек
-                    for (int j = 0; j < solve[0].length; j++) {
-                        int rowV = row + solve[0][j];
-                        int colV = col + solve[1][j];
-                        if (checkInPlace(rowV, colV)) {
-                            graph.addEdge(vertex, cordToVertex(rowV, colV));
-                        }
-                    }
+                    addToGraph(row, col);
                 }
-
-                for (ArrayList<int[]> list : teleports) {
-                    if (!list.isEmpty()) {
-                        int[] cord1 = list.get(0);
-                        int[] cord2 = list.get(1);
-                        int v1 = cordToVertex(cord1[0], cord1[1]);
-                        int v2 = cordToVertex(cord2[0], cord2[1]);
-                        graph.addEdge(v1, v2);
-                    }
+            }
+        }
+        try {
+            for (ArrayList<int[]> list : teleports) {
+                if (!list.isEmpty()) {
+                    int[] cord1 = list.get(0);
+                    int[] cord2 = list.get(1);
+                    int v1 = cordToVertex(cord1[0], cord1[1]);
+                    int v2 = cordToVertex(cord2[0], cord2[1]);
+                    graph.addEdge(v1, v2);
                 }
+            }
+        } catch (Exception e) {
+            SwingUtils.showInfoMessageBox("Некорректно указаны телепорты)");
+        }
+    }
+
+    private void addToGraph(int row, int col) {
+        int vertex = cordToVertex(row, col);
+
+        // Добавление рёбер для соседних ячеек
+        for (int j = 0; j < solve[0].length; j++) {
+            int rowV = row + solve[0][j];
+            int colV = col + solve[1][j];
+            if (checkInPlace(rowV, colV)) {
+                graph.addEdge(vertex, cordToVertex(rowV, colV));
             }
         }
     }
