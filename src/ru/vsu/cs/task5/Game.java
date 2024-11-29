@@ -4,6 +4,7 @@ import ru.vsu.cs.graph.ListGraph;
 import ru.vsu.cs.util.SwingUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Класс, реализующий логику проекта
@@ -16,6 +17,7 @@ public class Game {
     public static class Cell {
         public CellState state;
         public int value;
+        public int teleportNumber;
 
         public Cell(CellState state, int value) {
             this.state = state;
@@ -28,7 +30,7 @@ public class Game {
      */
     private Cell[][] field = null;
     private ListGraph graph = null;
-    private final ArrayList<int[]>[] teleports = new ArrayList[10];
+    private ArrayList<int[]>[] teleports = new ArrayList[10];
     private int result = 0;
 
 
@@ -52,15 +54,20 @@ public class Game {
                 field[row][col] = new Cell(CellState.OPENED, 0);
             }
         }
+        restoreTeleports();
+
+        graph = new ListGraph(rowCount * colCount);
+    }
+
+    private void restoreTeleports() {
         for (int i = 0; i < 10; i++) {
             teleports[i] = new ArrayList<>();
         }
-        graph = new ListGraph(rowCount * colCount);
     }
 
     public void leftMouseClick(int row, int col) {
         int rowCount = getRowCount(), colCount = getColCount();
-        if (row < 0 || row >= rowCount || col < 0 || col >= colCount) {
+        if (row < 0 || row >= rowCount || col < 0 || col >= colCount || field[row][col].state == CellState.TELEPORT) {
             return;
         }
         field[row][col].state = CellState.CLOSED;
@@ -68,12 +75,13 @@ public class Game {
 
     public void middleMouseClick(int row, int col) {
         int rowCount = getRowCount(), colCount = getColCount();
-        if (row < 0 || row >= rowCount || col < 0 || col >= colCount) {
+        if (row < 0 || row >= rowCount || col < 0 || col >= colCount || field[row][col].state == CellState.TELEPORT) {
             return;
         }
         field[row][col].state = CellState.END;
     }
 
+    //Правая кнопка возвращает статус OPENED -> удаление
     public void rightMouseClick(int row, int col) {
         int rowCount = getRowCount(), colCount = getColCount();
         if (row < 0 || row >= rowCount || col < 0 || col >= colCount) {
@@ -81,7 +89,34 @@ public class Game {
         }
         if (field[row][col].state == CellState.OPENED) {
             field[row][col].state = CellState.START;
+        } else if (field[row][col].state == CellState.TELEPORT) {
+            int id = field[row][col].teleportNumber;
+            for (int[] cord : teleports[id]) {
+                field[cord[0]][cord[1]].state = CellState.OPENED;
+            }
+            teleports[id].clear();
         } else field[row][col].state = CellState.OPENED;
+    }
+
+    //Установка телепортов
+    public void leftMouseClickTeleport(int row, int col) {
+        int rowCount = getRowCount(), colCount = getColCount();
+        if (row < 0 || row >= rowCount || col < 0 || col >= colCount || field[row][col].state == CellState.TELEPORT) {
+            return;
+        }
+        if (teleports[teleports.length - 1].size() == 2) {
+            teleports = Arrays.copyOf(teleports, teleports.length + 5);
+            for (int j = teleports.length - 5; j < teleports.length; j++) {
+                teleports[j] = new ArrayList<int[]>();
+            }
+        }
+        int i = 0;
+        while (teleports[i].size() == 2) {
+            i++;
+        }
+        teleports[i].add(new int[]{row, col});
+        field[row][col].state = CellState.TELEPORT;
+        field[row][col].teleportNumber = i;
     }
 
     public void StartClick(int type) {
@@ -163,11 +198,7 @@ public class Game {
                 }
             }
         }
-    }
-
-
-    private boolean checkProgress(int row, int col, int row_rez, int col_rez) {
-        return field[row][col].value == field[row_rez][col_rez].value - 1 && field[row][col].value != 0;
+        restoreTeleports();
     }
 
     public boolean checkInPlace(int row, int col) {
@@ -206,25 +237,15 @@ public class Game {
                     }
                 }
 
-                // Работа с телепортами
-                if (field[row][col].state == CellState.TELEPORT) {
-                    teleports[field[row][col].value].add(new int[]{row, col});
+                for (ArrayList<int[]> list : teleports) {
+                    if (!list.isEmpty()) {
+                        int[] cord1 = list.get(0);
+                        int[] cord2 = list.get(1);
+                        int v1 = cordToVertex(cord1[0], cord1[1]);
+                        int v2 = cordToVertex(cord2[0], cord2[1]);
+                        graph.addEdge(v1, v2);
+                    }
                 }
-            }
-        }
-
-        // Проверка телепортов
-        for (ArrayList<int[]> list : teleports) {
-            if (list.size() != 2 && !list.isEmpty()) {
-                throw new IllegalArgumentException("Некорректно заданы телепорты");
-            } else if (list.size() == 2) {
-                // Связывание телепортов
-                int[] t1 = list.get(0);
-                int[] t2 = list.get(1);
-                int v1 = cordToVertex(t1[0], t1[1]);
-                int v2 = cordToVertex(t2[0], t2[1]);
-                graph.addEdge(v1, v2);
-                graph.addEdge(v2, v1);
             }
         }
     }

@@ -12,8 +12,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 
-import static ru.vsu.cs.task5.Game.CellState;
-
 public class MainForm extends JFrame {
     private JPanel panelMain;
     private JTable tableGameField;
@@ -21,6 +19,8 @@ public class MainForm extends JFrame {
     private JButton startButton;
     private JLabel resultLabel;
     private JButton cleanButton;
+    private JComboBox typeMethods;
+    private JCheckBox teleportBox;
 
     private static final int DEFAULT_COL_COUNT = 10;
     private static final int DEFAULT_ROW_COUNT = 6;
@@ -41,7 +41,7 @@ public class MainForm extends JFrame {
 
 
     public MainForm() {
-        this.setTitle("Ход Конем (Task 3)");
+        this.setTitle("Поиск путей");
         this.setContentPane(panelMain);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
@@ -94,7 +94,11 @@ public class MainForm extends JFrame {
                 int row = tableGameField.rowAtPoint(e.getPoint());
                 int col = tableGameField.columnAtPoint(e.getPoint());
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    game.leftMouseClick(row, col);
+                    if (teleportBox.isSelected()) {
+                        game.leftMouseClickTeleport(row, col);
+                    } else {
+                        game.leftMouseClick(row, col);
+                    }
                     updateView();
                 }
                 if (SwingUtilities.isRightMouseButton(e)) {
@@ -172,9 +176,9 @@ public class MainForm extends JFrame {
     private JMenuBar createMenuBar() {
         JMenuBar menuBarMain = new JMenuBar();
 
-        JMenu menuGame = new JMenu("Игра");
+        JMenu menuGame = new JMenu("Приложение");
         menuBarMain.add(menuGame);
-        menuGame.add(createMenuItem("Новая", "ctrl+N", null, e -> {
+        menuGame.add(createMenuItem("Новое поле", "ctrl+N", null, e -> {
             newGame();
         }));
         menuGame.add(createMenuItem("Параметры", "ctrl+P", null, e -> {
@@ -196,15 +200,14 @@ public class MainForm extends JFrame {
 
         JMenu menuHelp = new JMenu("Справка");
         menuBarMain.add(menuHelp);
-        menuHelp.add(createMenuItem("Правила", "ctrl+R", null, e -> {
-            SwingUtils.showInfoMessageBox("Здесь должно быть краткое описание правил ...", "Правила");
+        menuHelp.add(createMenuItem("Инструкция", "ctrl+R", null, e -> {
+            SwingUtils.showInfoMessageBox("Здесь должно быть краткое описание правил ...", "Правила"); //TODO управление
         }));
         menuHelp.add(createMenuItem("О программе", "ctrl+A", null, e -> {
             SwingUtils.showInfoMessageBox(
-                    "Шаблон для создания игры" +
-                            "\n\nАвтор: Соломатин Д.И." +
-                            "\nE-mail: solomatin.cs.vsu.ru@gmail.com",
-                    "О программе"
+                    "Task 5 - СИАКОД 2024" +
+                            "\n\nАвтор: Одинаев И.Д. \n" +
+                            "О программе"
             );
         }));
 
@@ -240,59 +243,39 @@ public class MainForm extends JFrame {
     private void paintCell(int row, int column, Graphics2D g2d, int cellWidth, int cellHeight) {
         Game.Cell cellValue = game.getCell(row, column);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        if (cellValue.state == CellState.OPENED) {
-            return;
-        }
-        if (cellValue.state == CellState.START) {
-            Color color = Color.RED;
-
-            int size = Math.min(cellWidth, cellHeight);
-            int bound = (int) Math.round(size * 0.1);
-
-            g2d.setColor(color);
-            g2d.fillRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.drawRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
-
-        }
-        if (cellValue.state == CellState.CLOSED) {
-            Color color = Color.BLACK;
-
-            int size = Math.min(cellWidth, cellHeight);
-            int bound = (int) Math.round(size * 0.1);
-
-            g2d.setColor(color);
-            g2d.fillRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.drawRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
+        int size = Math.min(cellWidth, cellHeight);
+        int bound = (int) Math.round(size * 0.1);
+        Color color;
+        String text = null;
+        switch (cellValue.state) {
+            case OPENED -> {
+                return;
+            }
+            case START -> color = Color.RED;
+            case CLOSED -> color = Color.BLACK;
+            case END -> color = Color.GREEN;
+            case RESULT -> {
+                color = Color.YELLOW;
+                text = String.valueOf(cellValue.value);
+            }
+            case TELEPORT -> {
+                color = new Color(128, 0, 128); // Фиолетовый
+                text = "*".concat(String.valueOf(cellValue.teleportNumber));
+            }
+            default -> color = Color.WHITE;
 
         }
-        if (cellValue.state == CellState.END) {
-            Color color = Color.GREEN;
 
-            int size = Math.min(cellWidth, cellHeight);
-            int bound = (int) Math.round(size * 0.1);
+        g2d.setColor(color);
+        g2d.fillRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
 
-            g2d.setColor(color);
-            g2d.fillRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.drawRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
+        g2d.setColor(Color.DARK_GRAY);
+        g2d.drawRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
 
-        }
-        if (cellValue.state == CellState.RESULT) {
-            Color color = Color.YELLOW;
-
-            int size = Math.min(cellWidth, cellHeight);
-            int bound = (int) Math.round(size * 0.1);
-
-            g2d.setColor(color);
-            g2d.fillRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.drawRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, bound * 3, bound * 3);
-
-            g2d.setFont(getFont(size - 2 * bound));
+        if (text != null) {
+            g2d.setFont(getFont(size - 6 * bound));
             g2d.setColor(DrawUtils.getContrastColor(color));
-            DrawUtils.drawStringInCenter(g2d, font, "" + cellValue.value, 0, 0, cellWidth, (int) Math.round(cellHeight * 0.95));
+            DrawUtils.drawStringInCenter(g2d, font, text, 0, 0, cellWidth, (int) Math.round(cellHeight * 0.95));
         }
     }
 
