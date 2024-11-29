@@ -42,7 +42,7 @@ public class MainForm extends JFrame {
 
 
     public MainForm() {
-        this.setTitle("Поиск путей");
+        this.setTitle("Поиск пути");
         this.setContentPane(panelMain);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
@@ -129,7 +129,7 @@ public class MainForm extends JFrame {
         cleanButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                game.clean_field();
+                game.cleanField();
                 resultLabel.setText("Минимальное количество ходов до точки: " + 0);
                 updateView();
             }
@@ -201,7 +201,13 @@ public class MainForm extends JFrame {
         JMenu menuHelp = new JMenu("Справка");
         menuBarMain.add(menuHelp);
         menuHelp.add(createMenuItem("Инструкция", "ctrl+R", null, e -> {
-            SwingUtils.showInfoMessageBox("Здесь должно быть краткое описание правил ...", "Правила"); //TODO управление
+            SwingUtils.showInfoMessageBox(
+                    "ПКМ по пустому полю -> START \n" +
+                            "ПКМ по занятой ячейке -> удалить \n" +
+                            "ЛКМ -> создать преграду \n" +
+                            "Средняя КM -> END \n" +
+                            "Телепорт, ЛКМ -> установить телепорт \n"
+                    , "FAQ");
         }));
         menuHelp.add(createMenuItem("О программе", "ctrl+A", null, e -> {
             SwingUtils.showInfoMessageBox(
@@ -261,6 +267,10 @@ public class MainForm extends JFrame {
             case TELEPORT -> {
                 color = new Color(128, 0, 128); // Фиолетовый
                 text = "*".concat(String.valueOf(cellValue.teleportNumber));
+            }
+            case CRAWL -> {
+                color = Color.WHITE;
+                text = String.valueOf(cellValue.value);
             }
             default -> color = Color.WHITE;
 

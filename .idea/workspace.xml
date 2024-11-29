@@ -6,18 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="63e69c7d-c426-4efb-b553-bb8ec5156127" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/graph/ListGraph.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/graph/ListGraph.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/graph/ListGraph.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/Game$Cell.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/Game$Cell.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/Game$CellState.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/Game$CellState.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/Game.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/Game.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$1$DrawComponent.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$1$DrawComponent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$4.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$6.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm$6.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task_5/ru/vsu/cs/task5/MainForm.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/graph/ListGraph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ru/vsu/cs/graph/ListGraph.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/graph/ListGraph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ru/vsu/cs/graph/ListDigraph.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/task5/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ru/vsu/cs/task5/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/task5/MainForm.form" beforeDir="false" afterPath="$PROJECT_DIR$/src/ru/vsu/cs/task5/MainForm.form" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/task5/MainForm.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ru/vsu/cs/task5/MainForm.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -104,7 +101,7 @@
       <updated>1732823181517</updated>
       <workItem from="1732823183273" duration="2154000" />
       <workItem from="1732862596020" duration="11317000" />
-      <workItem from="1732889278675" duration="7279000" />
+      <workItem from="1732889278675" duration="17462000" />
     </task>
     <servers />
   </component>
@@ -121,5 +118,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/ru/vsu/cs/graph/ListDigraph.java</url>
+          <line>92</line>
+          <option name="timeStamp" value="68" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
