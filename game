@@ -4,4 +4,4 @@ cd "$(dirname "$(readlink -f "$0")")"  # "
 
 CP=
 
-nohup java -classpath "./out/production/GameTemplate:$CP" ru.vsu.cs.course1.game.Program "$@" >/dev/null 2>&1 &
+nohup java -classpath "./out/production/Task_5:$CP" ru.vsu.cs.task5.Program "$@" >/dev/null 2>&1 &

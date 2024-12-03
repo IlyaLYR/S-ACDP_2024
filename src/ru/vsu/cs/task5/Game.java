@@ -127,7 +127,8 @@ public class Game {
             int v2 = cordToVertex(startEnd[2], startEnd[3]);
             int[] path = switch (type) {
                 case 0 -> graph.waveSearch(v1, v2);
-                case 1 -> graph.aStarSearch(v1, v2);
+                case 1 -> graph.aStarSearch(v1, v2, getRowCount(), getColCount());
+                case 2 -> graph.dijkstra(v1,v2);
                 default -> new int[]{};
             };
             if (path.length == 0) {
@@ -227,6 +228,7 @@ public class Game {
             }
         }
         try {
+            graph.setTeleports(teleports);
             for (ArrayList<int[]> list : teleports) {
                 if (!list.isEmpty()) {
                     int[] cord1 = list.get(0);

@@ -77,6 +77,7 @@
               <model>
                 <item value="Волновой поиск"/>
                 <item value="A*"/>
+                <item value="Алгоритм Дейкстра"/>
               </model>
             </properties>
           </component>
