@@ -311,4 +311,8 @@ public class ListDigraph implements Graph {
         return baseHeuristic;
     }
 
+    public int FF(){
+        return -6;
+    }
+
 }

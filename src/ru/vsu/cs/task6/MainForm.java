@@ -115,7 +115,7 @@ public class MainForm extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-//                    game.StartClick(typeMethods.getSelectedIndex(), checkBoxTypeTeleports.isSelected());
+                    game.StartClick(checkBoxTypeTeleports.isSelected());
                     //TODO Изменить StartClick!!
                     resultLabel.setText("Минимальное количество клеток: " + game.getResult());
                     updateView();

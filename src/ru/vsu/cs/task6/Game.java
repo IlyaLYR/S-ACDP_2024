@@ -125,29 +125,21 @@ public class Game {
     }
 
     //TODO -> переделать метод
-    public void StartClick(int type, boolean typeTeleport) {
+    public void StartClick(boolean typeTeleport) {
         clean();
         createGraph(typeTeleport);
-        int[] startEnd = coordinates();
+        int[] startEnd = minotaurs();
         if (startEnd == null) {
-            SwingUtils.showInfoMessageBox("Начальная или конечная точка не указана! Или точки указанны некорректно...");
+            SwingUtils.showInfoMessageBox("Ищем минотавра...");
             return;
         }
         try {
             int v1 = cordToVertex(startEnd[0], startEnd[1]);
-            int v2 = cordToVertex(startEnd[2], startEnd[3]);
-            int[] path = switch (type) {
-                case 0 -> graph.waveSearch(v1, v2);
-                case 1 -> graph.aStarSearch(v1, v2, getRowCount(), getColCount());
-                case 2 -> graph.dijkstra(v1, v2);
-                default -> new int[]{};
-            };
-            if (path.length == 0) {
-                SwingUtils.showInfoMessageBox("Решений нет");
-            }
-            markResultStatus(path);
-            markCrawl();
-            result = field[startEnd[2]][startEnd[3]].value;
+
+
+            result = graph.FF();  ; //ОТВЕТ!!!
+            //TODO Разработать алгоритм также учесть вывод клеток! markResult();!!!
+
         } catch (Exception e) {
             SwingUtils.showInfoMessageBox("Ошибка поиска пути: " + e.getMessage());
         }
@@ -175,6 +167,26 @@ public class Game {
             }
         }
         if (start != 1 || end != 1) {
+            return null;
+        }
+        return array;
+    }
+
+    private int[] minotaurs() {
+        int[] array = new int[2];
+        int start = 0;
+
+        for (int row = 0; row < getRowCount(); row++) {
+            for (int col = 0; col < getColCount(); col++) {
+                Cell cellValue = getCell(row, col);
+                if (cellValue.state == CellState.START) {
+                    start++;
+                    array[0] = row;
+                    array[1] = col;
+                }
+            }
+        }
+        if (start != 1) {
             return null;
         }
         return array;
