@@ -23,3 +23,8 @@ while True:
     else:
         print("Не удалось загрузить страницу.")
     cache.print_table()  # Печать таблицы
+
+# url = "https://github.com/IlyaLYR/S-ACDP_TASK4"
+# cache.insert(url, fetch_html(url))
+# cache.print_table()
+

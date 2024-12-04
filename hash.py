@@ -15,7 +15,7 @@ class HashTable:
             size (int): размер таблицы (>0)
             methods (int, optional): Метод открытой адресации
                 1 - Линейное хеширование
-                2 - Двойное хеширование
+                2 - Двойное хеширование /TODO ...
             . Defaults to 1.
         """
         self.__size = size
@@ -39,7 +39,17 @@ class HashTable:
     def get_methods(self) -> int:
         return self.__methods
 
-    def hash1(self, key: str) -> int:
+    def get(self, key: str) -> Union[str, None]:
+        index = self.__hash1(key)
+        for _ in range(self.size):
+            if self.__table[index] is None:  # Пустая ячейка — ключа точно нет
+                return
+            if self.__table[index][0] == key and self.__table[index][1]:  # Найден ключ и он активен
+                return self.__table[index][1]
+            index = self.__solver(index, key)
+        print("Ключ не найден")
+
+    def __hash1(self, key: str) -> int:
         """Хеш-функция 1
 
         Args:
@@ -50,7 +60,7 @@ class HashTable:
         """
         return int(hashlib.sha256(key.encode('utf-8')).hexdigest(), 16) % self.size
 
-    def hash2(self, key: str) -> int:
+    def __hash2(self, key: str) -> int:
         """Хеш-функция 2
 
         Args:
@@ -71,7 +81,7 @@ class HashTable:
         Returns:
             bool: результат
         """
-        index = self.hash1(key)
+        index = self.__hash1(key)
         for _ in range(self.size):
             if self.__table[index] is None:  # Пустая ячейка — ключа точно нет
                 return False
@@ -93,7 +103,7 @@ class HashTable:
         if self.get_methods == 1:
             return (index + 1) % self.size
         else:
-            return (index + self.hash2(key)) % self.size
+            return (index + self.__hash2(key)) % self.size
 
     def insert(self, key: str, value: str) -> None:
         """Вставка элемента в таблицу
@@ -105,7 +115,7 @@ class HashTable:
         if self.count == self.size:
             print("Хеш-таблица -> заполнена!")
             return
-        index = self.hash1(key)
+        index = self.__hash1(key)
         for _ in range(self.size):
             if self.table[index] is None or (self.table[index][2] is False):  # Свободная или удалённая ячейка
                 self.__table[index] = (key, value, True)
@@ -125,7 +135,7 @@ class HashTable:
         if not self.is_contain(key):
             print("Ключ не найден!")
             return
-        index = self.hash1(key)
+        index = self.__hash1(key)
         for _ in range(self.size):
             if self.table[index][0] == key and self.table[index][2]:  # Найден ключ
                 self.__table[index] = (self.table[index][0], self.table[index][1], False)  # Пометить как "удалённую"
