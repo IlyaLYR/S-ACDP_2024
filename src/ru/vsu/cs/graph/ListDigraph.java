@@ -2,12 +2,15 @@ package ru.vsu.cs.graph;
 
 import java.util.*;
 
+import static java.lang.Math.min;
+
 public class ListDigraph implements Graph {
     ArrayList<Integer>[] adjList;
     private final int vCount;
     private int eCount = 0;
     private final HashMap<Integer, Integer> values = new HashMap<>();
     ArrayList<int[]>[] teleports;
+    private int[] block;
 
     public ListDigraph(int vCount) {
         this.vCount = vCount;
@@ -50,6 +53,10 @@ public class ListDigraph implements Graph {
     @Override
     public ArrayList<Integer> edges(int v) {
         return adjList[v];
+    }
+
+    public int[] getBlock() {
+        return block;
     }
 
     /**
@@ -304,15 +311,114 @@ public class ListDigraph implements Graph {
                 double teleportHeuristic2 = Math.sqrt(Math.pow(colGoal - tp2[1], 2) + Math.pow(rowGoal - tp2[0], 2)) +
                         Math.sqrt(Math.pow(colCurrent - tp1[1], 2) + Math.pow(rowCurrent - tp1[0], 2));
 
-                baseHeuristic = Math.min(baseHeuristic, Math.min(teleportHeuristic1, teleportHeuristic2));
+                baseHeuristic = min(baseHeuristic, min(teleportHeuristic1, teleportHeuristic2));
             }
         }
 
         return baseHeuristic;
     }
 
-    public int FF(){
-        return -6;
+
+    // Достроим граф -> объеденины стоки в один
+    private ArrayList<Integer>[] adjListWithSink(int[] exits) {
+//        int sink = vCount;
+        /*
+        Введу фиктивную вершину = vCount -> сток
+         */
+        ArrayList<Integer>[] adjList = this.adjList.clone();
+        for (int exit : exits) {
+            adjList[exit].add(vCount);
+        }
+        return adjList;
     }
 
+    //Игра в минотавра
+    public int minotaurGame(int minotaur, int[] exits) {
+        ArrayList<Integer>[] adjList = this.adjListWithSink(exits);
+        int[][] adjMatrix = convertListToMatrix(adjList);
+        return fordFulkerson(minotaur, vCount, adjMatrix);
+    }
+
+    /**
+     * Алгоритм Форда-Фалкерсона
+     *
+     * @param source    исток
+     * @param sink      сток
+     * @param adjMatrix матрица инцидентности
+     * @return максимальный поток
+     */
+    public int fordFulkerson(int source, int sink, int[][] adjMatrix) {
+        int[] parent = new int[vCount + 1];
+        int maxFlow = 0;
+
+        while (BFS(source, sink, parent, adjMatrix)) {
+            int flow = Integer.MAX_VALUE;
+            /*
+            Пробегаемся по вершинам и ищем минимальный вес ребра
+             */
+            for (int v = sink; v != source; v = parent[v]) {
+                int u = parent[v];
+                flow = Math.min(flow, adjMatrix[u][v]);
+            }
+
+            for (int v = sink; v != source; v = parent[v]) {
+                int u = parent[v];
+                adjMatrix[u][v] -= flow;
+                adjMatrix[v][u] += flow;
+            }
+
+            maxFlow += flow;
+        }
+        return maxFlow;
+    }
+
+    /**
+     * Проверка есть ли еще путь из истока в сток
+     *
+     * @param source    вершина исток
+     * @param sink      вершина сток
+     * @param parent    массив родителей
+     * @param adjMatrix матрица инцидентности
+     * @return true or false
+     */
+    private boolean BFS(int source, int sink, int[] parent, int[][] adjMatrix) {
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(source);
+        Set<Integer> visited = new HashSet<>();
+        visited.add(source);
+
+        while (!queue.isEmpty()) {
+            int current = queue.poll();
+
+            for (int neighbor = 0; neighbor < adjMatrix.length; neighbor++) {
+                // Проверяем, если вершина не посещена и остаточная пропускная способность == 1
+                if (!visited.contains(neighbor) && adjMatrix[current][neighbor] == 1) {
+                    queue.add(neighbor);
+                    parent[neighbor] = current;
+                    visited.add(neighbor);
+
+                    if (neighbor == sink) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Вспомогательный метод для создания матрицы инцидентности из листа смежности
+     *
+     * @param adjList лист смежности
+     * @return матрица инцидентности
+     */
+    private int[][] convertListToMatrix(ArrayList<Integer>[] adjList) {
+        int[][] adjMatrix = new int[vCount + 1][vCount + 1];
+        for (int u = 0; u < vCount; u++) {
+            for (int v : adjList[u]) {
+                adjMatrix[u][v] = 1;
+            }
+        }
+        return adjMatrix;
+    }
 }

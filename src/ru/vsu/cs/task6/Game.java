@@ -44,10 +44,16 @@ public class Game {
     private int result = 0;
 
 
-    int[][] solve = {{-1, 0}, // Вверх
+    int[][] solve = {
+            {-1, 0}, // Вверх
             {1, 0},  // Вниз
             {0, -1}, // Влево
-            {0, 1}   // Вправо
+            {0, 1},// Вправо
+//            {-1, -1},// Влево-вверх
+//            {-1, 1},// Вправо-вверх
+//            {1, 1}, // Вправо-вниз
+//            {1, -1} // Влево-вниз
+
     };
 
     public int getResult() {
@@ -134,10 +140,18 @@ public class Game {
             return;
         }
         try {
-            int v1 = cordToVertex(startEnd[0], startEnd[1]);
+            int source = cordToVertex(startEnd[0], startEnd[1]);
+            ArrayList<Integer> exit = exit();
+            int[] exits = new int[exit.size()];
+            for (int i = 0; i < exit.size(); i++) {
+                exits[i] = exit.get(i);
+            }
+            markEndStatus(exits);
 
+            result = graph.minotaurGame(source, exits);
+            //TODO ТЕЛЕПОРТЫ НЕ ЧИСТИТСЯ ПРИ ЗАГРУЗКИ КАРТЫ
 
-            result = graph.FF();  ; //ОТВЕТ!!!
+            //ОТВЕТ!!!
             //TODO Разработать алгоритм также учесть вывод клеток! markResult();!!!
 
         } catch (Exception e) {
@@ -192,17 +206,55 @@ public class Game {
         return array;
     }
 
+    private boolean isCellOpened(int row, int col) {
+        return field[row][col].state == CellState.OPENED || field[row][col].state == CellState.TELEPORT;
+    }
+
+    private ArrayList<Integer> exit() {
+        int rows = field.length;
+        int cols = field[0].length;
+        ArrayList<Integer> result = new ArrayList<>();
+
+        // Верхний ряд
+        for (int i = 0; i < cols; i++) {
+            if (isCellOpened(0, i)) {
+                result.add(cordToVertex(0, i));
+            }
+        }
+        // Последний столбец
+        for (int i = 1; i < rows; i++) {
+            if (isCellOpened(i, cols - 1)) {
+                result.add(cordToVertex(i, cols - 1));
+            }
+        }
+        // Нижняя строка
+        if (rows > 1) {
+            for (int i = cols - 2; i >= 0; i--) {
+                if (isCellOpened(rows - 1, i)) {
+                    result.add(cordToVertex(rows - 1, i));
+                }
+            }
+        }
+        // Первый столбец
+        if (cols > 1) {
+            for (int i = rows - 2; i > 0; i--) {
+                if (isCellOpened(i, 0)) {
+                    result.add(cordToVertex(i, 0));
+                }
+            }
+        }
+        return result;
+    }
+
+
     //Очистка поля от прошлого результата
     public void clean() { //очистка поля
         for (int row = 0; row < getRowCount(); row++) {
             for (int col = 0; col < getColCount(); col++) {
                 Cell cellValue = getCell(row, col);
                 field[row][col].value = 0;
-                if (cellValue.state == CellState.RESULT) {
-                    field[row][col].state = CellState.OPENED;
-                }
-                if (cellValue.state == CellState.CRAWL) {
-                    field[row][col].state = CellState.OPENED;
+                switch (field[row][col].state) {
+                    case RESULT, CRAWL, END -> field[row][col].state = CellState.OPENED;
                 }
             }
         }
@@ -225,6 +277,10 @@ public class Game {
         return ((row >= 0) && (row < getRowCount())) && ((col >= 0) && (col < getColCount())) && field[row][col].state != CellState.CLOSED;
     }
 
+    public boolean checkInPlaceMinotaur(int row, int col) {
+        return ((row >= 0) && (row < getRowCount())) && ((col >= 0) && (col < getColCount())) && field[row][col].state != CellState.CLOSED && field[row][col].state != CellState.START;
+    }
+
 
     public int getRowCount() {
         return field == null ? 0 : field.length;
@@ -244,9 +300,9 @@ public class Game {
         for (int row = 0; row < field.length; row++) {
             for (int col = 0; col < field[row].length; col++) {
                 if (isThrough || field[row][col].state != CellState.TELEPORT) {
-                    if (field[row][col].state == CellState.CLOSED) {
-                        continue;
-                    } else addToGraph(row, col);
+                    if (field[row][col].state != CellState.CLOSED) {
+                        addToGraph(row, col);
+                    }
                 }
             }
         }
@@ -274,7 +330,7 @@ public class Game {
         for (int[] into : solve) {
             int rowV = row + into[0];
             int colV = col + into[1];
-            if (checkInPlace(rowV, colV)) {
+            if (checkInPlaceMinotaur(rowV, colV)) {
                 graph.addEdge(vertex, cordToVertex(rowV, colV));
             }
         }
@@ -299,6 +355,21 @@ public class Game {
             SwingUtils.showInfoMessageBox("Ошибка обработки результата: " + e.getMessage());
         }
     }
+
+    private void markEndStatus(int[] way) {
+        try {
+            for (int j : way) {
+                int row = j / getColCount();
+                int col = j % getColCount();
+                if (field[row][col].state == CellState.OPENED) {
+                    field[row][col].state = CellState.END;
+                }
+            }
+        } catch (Exception e) {
+            SwingUtils.showInfoMessageBox("Ошибка обработки результата: " + e.getMessage());
+        }
+    }
+
 
     private void markCrawl() {
         for (int i = 0; i < graph.getCountVertex(); i++) {
@@ -331,7 +402,6 @@ public class Game {
 
     public void readFromTXT(String fileName) {
         try {
-            String[] vv = readLinesFromFile(fileName);
             toField(readLinesFromFile(fileName));
         } catch (IOException e) {
             SwingUtils.showInfoMessageBox("ОШИБКА ЧТЕНИЯ ФАЙЛА");
@@ -339,6 +409,7 @@ public class Game {
     }
 
     public void toField(String[] lines) {
+        clean();
         // Инициализация поля по размерам входного массива строк
         int rows = lines.length;
         int cols = lines[0].length();
