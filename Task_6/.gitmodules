@@ -1,0 +1,3 @@
+[submodule "Ford-Fulkerson"]
+	path = Ford-Fulkerson
+	url = https://github.com/trofimovby/Ford-Fulkerson.git
